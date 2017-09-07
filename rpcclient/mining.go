@@ -215,6 +215,15 @@ func (c *Client) GetHashesPerSec() (int64, error) {
 // GetMiningInfoAsync RPC invocation (or an applicable error).
 type FutureGetMiningInfoResult chan *response
 
+// Receive waits for the response promised by the future.
+func (r FutureGetMiningInfoResult) ReceiveFuture() ([]byte, error) {
+	res, err := receiveFuture(r)
+	if err != nil {
+		return nil, err
+	}
+	return res, nil
+}
+
 // Receive waits for the response promised by the future and returns the mining
 // information.
 func (r FutureGetMiningInfoResult) Receive() (*btcjson.GetMiningInfoResult, error) {
