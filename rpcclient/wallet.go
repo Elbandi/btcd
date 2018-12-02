@@ -2272,6 +2272,15 @@ func (c *Client) ImportPubKeyRescan(pubKey string, rescan bool) error {
 // GetInfoAsync RPC invocation (or an applicable error).
 type FutureGetInfoResult chan *response
 
+// Receive waits for the response promised by the future.
+func (r FutureGetInfoResult) ReceiveFuture() ([]byte, error) {
+	res, err := receiveFuture(r)
+	if err != nil {
+		return nil, err
+	}
+	return res, nil
+}
+
 // Receive waits for the response promised by the future and returns the info
 // provided by the server.
 func (r FutureGetInfoResult) Receive() (*btcjson.InfoWalletResult, error) {
