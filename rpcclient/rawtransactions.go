@@ -272,7 +272,12 @@ func (c *Client) CreateRawTransactionAsync(inputs []btcjson.TransactionInput,
 	for addr, amount := range amounts {
 		convertedAmts[addr.String()] = amount.ToBTC()
 	}
-	cmd := btcjson.NewCreateRawTransactionCmd(inputs, convertedAmts, lockTime)
+	return c.CreateRawTransaction2Async(inputs, convertedAmts, lockTime)
+}
+
+func (c *Client) CreateRawTransaction2Async(inputs []btcjson.TransactionInput,
+	amounts map[string]float64, lockTime *int64) FutureCreateRawTransactionResult {
+	cmd := btcjson.NewCreateRawTransactionCmd(inputs, amounts, lockTime)
 	return c.sendCmd(cmd)
 }
 
