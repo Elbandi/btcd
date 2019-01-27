@@ -51,8 +51,11 @@ func (c *Client) GetTransactionAsync(txHash *chainhash.Hash) FutureGetTransactio
 	if txHash != nil {
 		hash = txHash.String()
 	}
+	return c.GetTransactionStrAsync(hash)
+}
 
-	cmd := btcjson.NewGetTransactionCmd(hash, nil)
+func (c *Client) GetTransactionStrAsync(txHash string) FutureGetTransactionResult {
+	cmd := btcjson.NewGetTransactionCmd(txHash, nil)
 	return c.sendCmd(cmd)
 }
 
