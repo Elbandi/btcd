@@ -209,6 +209,22 @@ func (c *Client) DecodeRawTransaction(serializedTx []byte) (*btcjson.TxRawResult
 // of a CreateRawTransactionAsync RPC invocation (or an applicable error).
 type FutureCreateRawTransactionResult chan *response
 
+func (r FutureCreateRawTransactionResult) ReceiveFuture() (string, error) {
+	res, err := receiveFuture(r)
+	if err != nil {
+		return "", err
+	}
+
+	// Unmarshal result as a string.
+	var txHex string
+	err = json.Unmarshal(res, &txHex)
+	if err != nil {
+		return "", err
+	}
+
+	return txHex, nil
+}
+
 // Receive waits for the response promised by the future and returns a new
 // transaction spending the provided inputs and sending to the provided
 // addresses.
@@ -345,6 +361,21 @@ func (c *Client) SendRawTransaction(tx *wire.MsgTx, allowHighFees bool) (*chainh
 // of one of the SignRawTransactionAsync family of RPC invocations (or an
 // applicable error).
 type FutureSignRawTransactionResult chan *response
+
+func (r FutureSignRawTransactionResult) ReceiveFuture() (string, bool, error) {
+	res, err := receiveFuture(r)
+	if err != nil {
+		return "", false, err
+	}
+
+	// Unmarshal as a signrawtransaction result.
+	var signRawTxResult btcjson.SignRawTransactionResult
+	err = json.Unmarshal(res, &signRawTxResult)
+	if err != nil {
+		return "", false, err
+	}
+	return signRawTxResult.Hex, signRawTxResult.Complete, nil
+}
 
 // Receive waits for the response promised by the future and returns the
 // signed transaction as well as whether or not all inputs are now signed.
