@@ -327,7 +327,10 @@ func (c *Client) SendRawTransactionAsync(tx *wire.MsgTx, allowHighFees bool) Fut
 		}
 		txHex = hex.EncodeToString(buf.Bytes())
 	}
+	return c.SendHexRawTransactionAsync(txHex, allowHighFees)
+}
 
+func (c *Client) SendHexRawTransactionAsync(txHex string, allowHighFees bool) FutureSendRawTransactionResult {
 	// Due to differences in the sendrawtransaction API for different
 	// backends, we'll need to inspect our version and construct the
 	// appropriate request.
@@ -428,6 +431,11 @@ func (c *Client) SignRawTransactionAsync(tx *wire.MsgTx) FutureSignRawTransactio
 		txHex = hex.EncodeToString(buf.Bytes())
 	}
 
+	cmd := btcjson.NewSignRawTransactionCmd(txHex, nil, nil, nil)
+	return c.sendCmd(cmd)
+}
+
+func (c *Client) SignHexRawTransactionAsync(txHex string) FutureSignRawTransactionResult {
 	cmd := btcjson.NewSignRawTransactionCmd(txHex, nil, nil, nil)
 	return c.sendCmd(cmd)
 }
