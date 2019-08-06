@@ -1513,8 +1513,12 @@ func (r FutureGetBalanceParseResult) Receive() (btcutil.Amount, error) {
 // returned instance.
 //
 // See GetBalance for the blocking version and more details.
-func (c *Client) GetBalanceAsync(account string) FutureGetBalanceResult {
-	cmd := btcjson.NewGetBalanceCmd(&account, nil)
+func (c *Client) GetBalanceAsync(account ...string) FutureGetBalanceResult {
+	var accountPtr *string = nil
+	if len(account) > 0 {
+		accountPtr = &account[0]
+	}
+	cmd := btcjson.NewGetBalanceCmd(accountPtr, nil)
 	return c.sendCmd(cmd)
 }
 
@@ -1523,8 +1527,8 @@ func (c *Client) GetBalanceAsync(account string) FutureGetBalanceResult {
 // be "*" for all accounts.
 //
 // See GetBalanceMinConf to override the minimum number of confirmations.
-func (c *Client) GetBalance(account string) (btcutil.Amount, error) {
-	return c.GetBalanceAsync(account).Receive()
+func (c *Client) GetBalance(account ...string) (btcutil.Amount, error) {
+	return c.GetBalanceAsync(account...).Receive()
 }
 
 // GetBalanceMinConfAsync returns an instance of a type that can be used to get
