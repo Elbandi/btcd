@@ -884,6 +884,24 @@ type FutureGetNewAddressResult struct {
 
 // Receive waits for the response promised by the future and returns a new
 // address.
+func (r FutureGetNewAddressResult) ReceiveFuture() (string, error) {
+	res, err := receiveFuture(r.responseChannel)
+	if err != nil {
+		return "", err
+	}
+
+	// Unmarshal result as a string.
+	var addr string
+	err = json.Unmarshal(res, &addr)
+	if err != nil {
+		return "", err
+	}
+
+	return addr, nil
+}
+
+// Receive waits for the response promised by the future and returns a new
+// address.
 func (r FutureGetNewAddressResult) Receive() (btcutil.Address, error) {
 	res, err := receiveFuture(r.responseChannel)
 	if err != nil {
