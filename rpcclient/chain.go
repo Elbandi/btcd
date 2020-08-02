@@ -62,9 +62,19 @@ func (c *Client) legacyGetBlockRequest(hash string, verbose,
 	if err != nil {
 		return nil, err
 	}
+	if !verbose && !verboseTx {
+		return c.RawRequest("getblock", []json.RawMessage{
+			hashJSON,
+		})
+	}
 	verboseJSON, err := json.Marshal(btcjson.Bool(verbose))
 	if err != nil {
 		return nil, err
+	}
+	if !verboseTx {
+		return c.RawRequest("getblock", []json.RawMessage{
+			hashJSON, verboseJSON,
+		})
 	}
 	verboseTxJSON, err := json.Marshal(btcjson.Bool(verboseTx))
 	if err != nil {
@@ -87,7 +97,8 @@ func (c *Client) waitForGetBlockRes(respChan chan *response, hash string,
 	// communicating with a btcd node which only understands the legacy
 	// request, so we'll try that.
 	if err, ok := err.(*btcjson.RPCError); ok &&
-		err.Code == btcjson.ErrRPCInvalidParams.Code {
+		err.Code == btcjson.ErrRPCMisc &&
+		(err.Message == "JSON value is not a boolean as expected" || err.Message == "value is type int, expected bool") {
 		return c.legacyGetBlockRequest(hash, verbose, verboseTx)
 	}
 
