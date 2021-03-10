@@ -8,6 +8,7 @@ import (
 	"bytes"
 	"encoding/hex"
 	"encoding/json"
+	"fmt"
 
 	"github.com/btcsuite/btcd/chaincfg/chainhash"
 
@@ -91,6 +92,29 @@ type GetBlockVerboseResult struct {
 	NextHash      string        `json:"nextblockhash,omitempty"`
 }
 
+func (r *GetBlockVerboseResult) UnmarshalJSON(data []byte) error {
+	var err error
+	type Alias GetBlockVerboseResult
+	aux := &struct {
+		Nonce interface{} `json:"nonce"`
+		*Alias
+	}{
+		Alias: (*Alias)(r),
+	}
+	if err = json.Unmarshal(data, &aux); err != nil {
+		return err
+	}
+	switch nonce := aux.Nonce.(type) {
+	case uint32:
+		r.Nonce = nonce
+	case string:
+		r.Nonce = 0 // dont decode zcash nonce
+	default:
+		return fmt.Errorf("failed to unmarshal GetBlockVerboseResult of type: %T", nonce)
+	}
+	return nil
+}
+
 // GetBlockVerboseTxResult models the data from the getblock command when the
 // verbose flag is set to 2.  When the verbose flag is set to 0, getblock returns a
 // hex-encoded string. When the verbose flag is set to 1, getblock returns an object
@@ -115,6 +139,29 @@ type GetBlockVerboseTxResult struct {
 	Difficulty    float64       `json:"difficulty"`
 	PreviousHash  string        `json:"previousblockhash"`
 	NextHash      string        `json:"nextblockhash,omitempty"`
+}
+
+func (r *GetBlockVerboseTxResult) UnmarshalJSON(data []byte) error {
+	var err error
+	type Alias GetBlockVerboseTxResult
+	aux := &struct {
+		Nonce interface{} `json:"nonce"`
+		*Alias
+	}{
+		Alias: (*Alias)(r),
+	}
+	if err = json.Unmarshal(data, &aux); err != nil {
+		return err
+	}
+	switch nonce := aux.Nonce.(type) {
+	case uint32:
+		r.Nonce = nonce
+	case string:
+		r.Nonce = 0 // dont decode zcash nonce
+	default:
+		return fmt.Errorf("failed to unmarshal GetBlockVerboseTxResult of type: %T", nonce)
+	}
+	return nil
 }
 
 // GetChainTxStatsResult models the data from the getchaintxstats command.
