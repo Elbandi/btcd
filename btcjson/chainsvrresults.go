@@ -107,6 +107,11 @@ func (r *GetBlockVerboseResult) UnmarshalJSON(data []byte) error {
 	switch nonce := aux.Nonce.(type) {
 	case uint32:
 		r.Nonce = nonce
+	case uint64:
+		r.Nonce = uint32(nonce)
+	case float32:
+	case float64:
+		r.Nonce = uint32(nonce)
 	case string:
 		r.Nonce = 0 // dont decode zcash nonce
 	default:
